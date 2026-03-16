@@ -8,7 +8,19 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 - List at least two concrete bugs you noticed at the start  
   (for example: "the hints were backwards").
 
----
+
+Here are at least three concrete bugs I identified:
+
+1. Hints are wrong (higher/lower messages inverted)
+When your guess is too high, the game says “Go HIGHER!”
+When your guess is too low, the game says “Go LOWER!”
+
+2. New Game doesn’t fully reset the game state.
+You can start a “new game” but still be stuck saying “Game over” or carry over scores/guesses from the last round.
+
+3. Incorrect attempt counter initialization: The game started with attempts = 1 instead of 0, causing the "attempts left" display to be off by one. For example, with 8 attempts allowed on Normal difficulty, it showed 7 attempts left at the start instead of 8, making it confusing for players to track their remaining guesses.
+
+4. Secret number appears to change when submitting guesses, because the code mixes types (int vs str) in comparisons and produces inconsistent results even though the secret value is actually stable.
 
 ## 2. How did you use AI as a teammate?
 
