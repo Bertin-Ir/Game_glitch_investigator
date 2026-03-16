@@ -4,6 +4,7 @@ import streamlit as st
 
 from logic_utils import (
     check_guess,
+    get_attempt_limit_for_difficulty,
     get_range_for_difficulty,
     parse_guess,
     update_score,
@@ -22,12 +23,9 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
-attempt_limit_map = {
-    "Easy": 6,
-    "Normal": 8,
-    "Hard": 5,
-}
-attempt_limit = attempt_limit_map[difficulty]
+# FIX: AI (Claude Code) refactored inline attempt_limit_map into logic_utils.py
+# so game rules are testable independently of the Streamlit UI.
+attempt_limit = get_attempt_limit_for_difficulty(difficulty)
 
 low, high = get_range_for_difficulty(difficulty)
 
@@ -38,7 +36,7 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0  # FIX: was 1; AI identified off-by-one on first load
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -77,15 +75,22 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
-    st.session_state.attempts = 1
+    # FIX: AI (Claude Code) found that score and history were never cleared on reset,
+    # and attempts started at 1 instead of 0; verified by starting a new game after
+    # a completed round and confirming clean state in the Developer Debug Info expander.
+    st.session_state.attempts = 0
     st.session_state.secret = random.randint(low, high)
     st.session_state.status = "playing"
+    st.session_state.score = 0
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
 # Mapping from canonical outcome to UI hint message
 OUTCOME_HINTS = {
     "Win": "🎉 Correct!",
+    # FIX: Hints were inverted — AI (Claude Code) identified the mismatch between
+    # check_guess() return values and the display strings; verified by playing the game.
     "Too High": "📉 Go LOWER!",
     "Too Low": "📈 Go HIGHER!",
 }
